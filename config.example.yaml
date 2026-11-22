@@ -1,0 +1,56 @@
+# Скопируй этот файл в config.yaml и заполни нужное.
+# Источник без ключей можно включить сразу: web, bluesky (и reddit, если пустит).
+
+days: 14                # искать посты за последние N дней
+database: giveaways.db
+html: giveaways.html    # открывай в браузере
+csv: giveaways.csv      # открывается в Excel
+
+web:                    # Instagram / TikTok / X / Gleam и т.д. через поисковик. Ключ НЕ нужен
+  enabled: true
+  results_per_query: 30
+  timelimit: w          # d = день, w = неделя, m = месяц
+  # max_queries: 50     # раскомментируй для быстрого теста
+
+bluesky:                # ключ НЕ нужен
+  enabled: true
+  max_queries: 60
+
+reddit:
+  enabled: true
+  time: week
+  client_id: ""         # необязательно, но без него Reddit часто блокирует
+  client_secret: ""
+
+telegram:               # api_id и api_hash: https://my.telegram.org → API development tools
+  enabled: false
+  api_id: 0
+  api_hash: ""
+  session_string: ""    # для сервера: строка из make_tg_session.py
+  session: hunter_session
+  messages_per_channel: 150
+  delay: 1.0
+  extra_channels: []    # свои каналы, например: ["@some_giveaways", "@another"]
+  extra_channel_queries: []
+
+youtube:                # ключ: console.cloud.google.com → YouTube Data API v3 → Credentials
+  enabled: false
+  api_key: ""
+  max_queries: 90       # ~100 в день бесплатно
+
+vk:                     # токен: см. README
+  enabled: false
+  access_token: ""
+  pages: 5
+  extra_queries: []
+
+notify:                 # уведомления о новых находках тебе в Telegram (необязательно)
+  bot_token: ""         # от @BotFather
+  chat_id: ""           # свой id узнать у @userinfobot
+                        # несколько людей: chat_id: [111111111, 222222222]
+                        # группа: chat_id: -1001234567890  (бот должен быть в группе)
+  prizes: [ps5, gta6]   # о чём слать: [ps5] — только PS5, [gta6] — только GTA 6, оба — всё
+  min_score: 45
+  max_per_run: 30
+  send_empty: true      # писать «новых нет», если ничего не нашлось
+  report_url: ""        # ссылка на отчёт (GitHub Pages), придёт в каждом сообщении

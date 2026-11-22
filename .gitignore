@@ -1,0 +1,5 @@
+config.yaml
+*.session
+*.session-journal
+__pycache__/
+hunter.log
