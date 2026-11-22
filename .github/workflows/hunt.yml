@@ -1,0 +1,54 @@
+name: Охотник за розыгрышами
+
+on:
+  schedule:
+    # Как часто запускать. Оставь ОДНУ строку без # в начале:
+    - cron: "17 */5 * * *"     # каждые 5 часов
+    # - cron: "17 * * * *"     # каждый час
+    # - cron: "17 */10 * * *"  # каждые 10 часов
+    # - cron: "17 */12 * * *"  # каждые 12 часов
+  workflow_dispatch:           # кнопка «Run workflow» для ручного запуска
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hunter
+  cancel-in-progress: false
+
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Установка библиотек
+        run: pip install -r requirements.txt
+
+      - name: Конфиг из секрета CONFIG_YAML
+        env:
+          CONFIG_YAML: ${{ secrets.CONFIG_YAML }}
+        run: |
+          if [ -z "$CONFIG_YAML" ]; then echo "::error::Нет секрета CONFIG_YAML (Settings → Secrets and variables → Actions)"; exit 1; fi
+          printf '%s\n' "$CONFIG_YAML" > config.yaml
+
+      - name: Поиск розыгрышей
+        run: python main.py
+
+      - name: Сохранение базы
+        if: always()
+        run: |
+          rm -f config.yaml *.session
+          git config user.name "hunter-bot"
+          git config user.email "hunter-bot@users.noreply.github.com"
+          git add giveaways.db giveaways.html giveaways.csv 2>/dev/null || true
+          git diff --cached --quiet && exit 0
+          git commit -m "Обновление базы $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git pull --rebase || true
+          git push
